@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.AchieveREResponder;
@@ -31,26 +32,42 @@ public class AuctioneerAgent extends Agent{
 		buyerTransactions = new LinkedList<>();
 		uberTransactions = new LinkedList<>();
 		taxiTransactions = new LinkedList<>();
-		
+
 		Object[] args = getArguments();
 		delta = (float) args[0];
 		maxMarketPrice = (float) args[1];
 		numRounds = (int) args[2];
-		
+
 		tradingRound = 1;
 		outstandingBid = 0;
 		outstandingAsk = maxMarketPrice;
 		buyerName = null;
 		sellerName = null;
 		status = 0;
-		
+
+		System.out.println("------------ Starting trading round " + tradingRound + " of " + numRounds + " ------------");
+
 		addBehaviour(new FIPARequestResp(this, MessageTemplate.MatchPerformative(ACLMessage.REQUEST)));
 	}
 	
+	float getTransactionsValue(LinkedList<Float> l)
+	{
+		float profit = 0;
+		for (Float transaction : l) {
+			profit += transaction;
+		}
+		return profit;
+	}
+
 	void startNewRound()
 	{
 		tradingRound++;
-		System.out.println("------------ Starting trading round number " + tradingRound + " ------------");
+		if(tradingRound > numRounds)
+		{
+			addBehaviour(new WaitSendingMessagesBehaviour());
+		}
+		else
+			System.out.println("------------ Starting trading round " + tradingRound + " of " + numRounds + " ------------");
 		outstandingBid = 0;
 		outstandingAsk = Integer.MAX_VALUE;
 		buyerName = null;
@@ -162,6 +179,32 @@ public class AuctioneerAgent extends Agent{
 				result.setContent("A new offer has been registered!");
 			}
 			return result;
+		}
+	}
+	
+	class WaitSendingMessagesBehaviour extends Behaviour {
+
+		boolean done = false;
+		@Override
+		public void action() {
+			if(buyerTransactions.size() == numRounds &&
+					uberTransactions.size() == numRounds &&
+					taxiTransactions.size() == numRounds)
+			{
+				System.out.println("------------ Trading has ended! ------------");
+				System.out.println("Buyer spent " + getTransactionsValue(buyerTransactions) + " in the folowing transactions:");
+				System.out.println(buyerTransactions);
+				System.out.println("Uber profited " + getTransactionsValue(uberTransactions) +  " from the folowing transactions:");
+				System.out.println(uberTransactions);
+				System.out.println("Taxi profited " + getTransactionsValue(taxiTransactions) +  " from the folowing transactions:");
+				System.out.println(taxiTransactions);
+				done = true;
+			}
+		}
+
+		@Override
+		public boolean done() {
+			return done;
 		}
 	}
 }

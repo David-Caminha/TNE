@@ -26,7 +26,7 @@ public class Launcher {
 		
 
         Object[] snifferArgs = new Object[1];
-        snifferArgs[0] = "auctioneer;buyer0;buyer1;buyer2;buyer3;buyer4;uberAgent0;uberAgent1;uberAgent2;uberAgent3;uberAgent4";
+        snifferArgs[0] = "buyer0;buyer1;buyer2;buyer3;buyer4;auctioneer;uberAgent0;uberAgent1;uberAgent2;uberAgent3;uberAgent4";
 	    try {
 			AgentController sniffer = mainContainer.createNewAgent("sniffer", "jade.tools.sniffer.Sniffer", snifferArgs);
 			sniffer.start();
@@ -90,5 +90,25 @@ public class Launcher {
 				e.printStackTrace();
 			}
 	    }
+	    
+
+	    Object[] taxiArgs = new Object[3];
+		taxiArgs[0] = 20.0f;
+		
+	    AgentController taxi;
+	    try {
+	    	String name = "taxiAgent1";
+	    	taxi = mainContainer.createNewAgent(name, "agents.TaxiAgent", taxiArgs);
+	    	taxi.start();
+	    	
+
+			taxiArgs[0] = 15.0f;
+	    	name = "taxiAgent2";
+	    	taxi = mainContainer.createNewAgent(name, "agents.TaxiAgent", taxiArgs);
+	    	taxi.start();
+		} catch (StaleProxyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

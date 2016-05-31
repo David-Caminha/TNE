@@ -204,6 +204,7 @@ public class BuyerAgent extends Agent{
 					String[] parts = msgContent.split(":");
 					float transactionValue = Float.parseFloat(parts[1]);
 					AuctioneerAgent.buyerTransactions.addLast(transactionValue);
+					waiting = false;
 					done = true;
 				}
 				else if(msgContent.equals("A new offer has been registered!"))
